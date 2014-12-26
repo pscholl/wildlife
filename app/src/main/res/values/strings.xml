@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">WildlifeMonitor</string>
+    <string name="title_activity_wild_life_monitor">WildLifeMonitor</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="sample_window_size">sampling time</string>
+    <string name="sleep_time">sleep time</string>
+    <string name="life_sign">send ping</string>
+    <string name="lifesign_url">ping URL</string>
+    <string name="low_power_mode">low power mode</string>
+    <string name="low_power_mode_label">low power mode</string>
+    <string name="is_recording">recording</string>
+    <string name="is_sleeping">sleeping</string>
+    <string name="not_enabled">recording not enabled</string>
+    <string name="recording_enabled_label">recording enabled</string>
+
+</resources>

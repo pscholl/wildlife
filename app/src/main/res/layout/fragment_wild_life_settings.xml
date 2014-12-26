@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/sample_window_size"
+            android:id="@+id/textView"
+            android:layout_alignBottom="@+id/window_size_value"
+            android:layout_alignParentLeft="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="0min"
+            android:id="@+id/window_size_value"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/windows_size_bar"
+            android:layout_below="@+id/window_size_value"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/sleep_time"
+            android:id="@+id/textView2"
+            android:layout_alignBottom="@+id/sleep_time"
+            android:layout_alignParentLeft="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="0min"
+            android:id="@+id/sleep_time"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/sleep_time_bar"
+            android:layout_below="@+id/sleep_time"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:layout_below="@+id/sleep_time_bar"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/life_sign"
+            android:id="@+id/textView3"
+            android:layout_alignBottom="@+id/life_sign"
+            android:layout_alignParentLeft="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="0min"
+            android:id="@+id/life_sign"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
+
+        <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/life_sign_bar"
+            android:layout_below="@+id/life_sign"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/lifesign_url"
+            android:id="@+id/textView4"
+            android:layout_below="@+id/life_sign_bar"
+            android:layout_alignParentStart="true" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="http://example.com"
+            android:id="@+id/life_sign_uri"
+            android:layout_below="@+id/life_sign_bar"
+            android:layout_alignEnd="@+id/life_sign" />
+    </RelativeLayout>
+
+    <Switch
+        android:layout_width="fill_parent"
+        android:paddingTop="20dp"
+        android:layout_height="wrap_content"
+        android:text="@string/low_power_mode_label"
+        android:id="@+id/low_power_mode_switch"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:elegantTextHeight="true" />
+
+    <Switch
+        android:layout_width="fill_parent"
+        android:paddingTop="20dp"
+        android:layout_height="wrap_content"
+        android:text="@string/recording_enabled_label"
+        android:id="@+id/recording_enabled_switch"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:elegantTextHeight="true" />
+
+</LinearLayout>
