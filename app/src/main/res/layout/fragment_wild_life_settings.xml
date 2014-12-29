@@ -18,24 +18,21 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/sample_window_size"
             android:id="@+id/textView"
-            android:layout_alignBottom="@+id/window_size_value"
+            android:layout_alignTop="@+id/window_size_value"
             android:layout_alignParentLeft="true" />
 
-        <TextView
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="0min"
             android:id="@+id/window_size_value"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true" />
+            android:layout_alignParentTop="true"
+            android:inputType="time" />
 
-        <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/windows_size_bar"
-            android:layout_below="@+id/window_size_value"
-            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -49,25 +46,20 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/sleep_time"
             android:id="@+id/textView2"
-            android:layout_alignBottom="@+id/sleep_time"
+            android:layout_alignTop="@+id/sleep_time"
             android:layout_alignParentLeft="true" />
 
-        <TextView
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:maxLines="1"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="0min"
             android:id="@+id/sleep_time"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true" />
-
-        <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/sleep_time_bar"
-            android:layout_below="@+id/sleep_time"
-            android:layout_centerHorizontal="true" />
-
+            android:layout_alignParentTop="true"
+            android:inputType="time" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -83,24 +75,19 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/life_sign"
             android:id="@+id/textView3"
-            android:layout_alignBottom="@+id/life_sign"
+            android:layout_alignTop="@+id/life_sign"
             android:layout_alignParentLeft="true" />
 
-        <TextView
+        <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:cursorVisible="false"
+            android:maxLines="1"
             android:text="0min"
             android:id="@+id/life_sign"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true" />
-
-        <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/life_sign_bar"
-            android:layout_below="@+id/life_sign"
-            android:layout_centerHorizontal="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -108,7 +95,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/lifesign_url"
             android:id="@+id/textView4"
-            android:layout_below="@+id/life_sign_bar"
+            android:layout_below="@+id/life_sign"
             android:layout_alignParentStart="true" />
 
         <EditText
@@ -117,7 +104,7 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="http://example.com"
             android:id="@+id/life_sign_uri"
-            android:layout_below="@+id/life_sign_bar"
+            android:layout_below="@+id/life_sign"
             android:layout_alignEnd="@+id/life_sign" />
     </RelativeLayout>
 

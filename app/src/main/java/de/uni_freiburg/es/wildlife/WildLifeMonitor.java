@@ -95,6 +95,7 @@ public class WildLifeMonitor extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            mViewPager.setCurrentItem(1, true);
             return true;
         }
 

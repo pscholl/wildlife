@@ -32,8 +32,6 @@ import javaFlacEncoder.StreamConfiguration;
  * helper methods.
  */
 public class DataRecorderService extends IntentService {
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_RECORD = "de.uni_freiburg.es.wildlife.action.RECORD";
     public static final String IS_RECORDING = "is_recording";
     private final String TAG = this.getClass().getSimpleName();
@@ -148,7 +146,7 @@ public class DataRecorderService extends IntentService {
                  SystemClock.elapsedRealtime() + sleep_time,
                  mNextSchedule);
 
-        enableLowPowerMode();
+        //enableLowPowerMode();
     }
 
     private void setIsRecording(boolean state) {
@@ -248,11 +246,19 @@ public class DataRecorderService extends IntentService {
 
     public int getMaxSampleRate() {
         for (int rate : new int[] {96000, 48000, 44100, 22050, 11025, 8000})
-            if (AudioRecord.getMinBufferSize(rate,
-                    AudioFormat.CHANNEL_IN_DEFAULT,
-                    AudioFormat.ENCODING_PCM_16BIT) > 0)
+            try {
+                int BUFSIZE =
+                        AudioRecord.getMinBufferSize(rate,
+                                AudioFormat.CHANNEL_IN_MONO,
+                                AudioFormat.ENCODING_PCM_16BIT);
+                AudioRecord r = new AudioRecord(
+                        MediaRecorder.AudioSource.CAMCORDER, rate,
+                        AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                        BUFSIZE);
                 return rate;
-
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, String.format("check rate %d", rate), e);
+            }
         return 0;
     }
 }
