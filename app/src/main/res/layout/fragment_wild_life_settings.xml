@@ -84,8 +84,8 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:cursorVisible="false"
             android:maxLines="1"
-            android:text="0min"
             android:id="@+id/life_sign"
+            android:inputType="time"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true" />
 
@@ -102,10 +102,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="http://example.com"
+            android:text="http://example.com/withaverylonglonglonglonglongtext"
             android:id="@+id/life_sign_uri"
             android:layout_below="@+id/life_sign"
-            android:layout_alignEnd="@+id/life_sign" />
+            android:layout_alignEnd="@+id/life_sign"
+            android:maxWidth="200dp"
+            android:layout_alignParentRight="true"
+            android:elegantTextHeight="true"
+            android:gravity="right" />
     </RelativeLayout>
 
     <Switch

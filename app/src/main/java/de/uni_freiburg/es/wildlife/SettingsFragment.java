@@ -1,20 +1,12 @@
 package de.uni_freiburg.es.wildlife;
 
-import android.content.ContextWrapper;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.InputFilter;
-import android.text.Spanned;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,14 +14,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import java.sql.Time;
-import java.util.Set;
 
 import wildlife.es.uni_freiburg.de.wildlifemonitor.R;
 
@@ -37,18 +23,6 @@ import wildlife.es.uni_freiburg.de.wildlifemonitor.R;
  * Created by phil on 12/26/14.
  */
 public class SettingsFragment extends Fragment {
-    public static final String PREF_WINDOW_SIZE = "window size_in_seconds";
-    public static final int PREF_WINDOW_SIZE_DEFAULT = 1 * 60; // in seconds
-    public static final int PREF_WINDOW_SIZE_MAX = 2 * 60 * 60;
-    public static final String PREF_SLEEP_TIME = "sleep_time_in_seconds";
-    public static final int PREF_SLEEP_TIME_DEFAULT = 10*60;
-    public static final String PREF_STORAGE_PATH = "storage_path";
-    public static final String PREF_STORAGE_PATH_DEFAULT =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).toString();
-    public static final String PREF_RECORD_ON = "recording_on";
-    public static final boolean PREF_RECORD_ON_DEFAULT = false;
-    public static final String PREF_LOW_POWERMODE = "lowpowerenabled";
-    public static final boolean PREF_LOW_POWERMODE_DEFAULT = false;
     private static final String TAG = SettingsFragment.class.getSimpleName();
 
     private SharedPreferences mPreferences;
@@ -69,15 +43,18 @@ public class SettingsFragment extends Fragment {
             new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals(PREF_RECORD_ON)) {
+            if (key.equals(AudioRecorderService.PREF_RECORD_ON)) {
                 Switch rsw = (Switch) rootView.findViewById(R.id.recording_enabled_switch);
                 rsw.setOnCheckedChangeListener(null);
-                rsw.setChecked(mPreferences.getBoolean(PREF_RECORD_ON, PREF_RECORD_ON_DEFAULT));
-                rsw.setOnCheckedChangeListener(new MySwitchListener(PREF_RECORD_ON));
+                rsw.setChecked(mPreferences.getBoolean(
+                        AudioRecorderService.PREF_RECORD_ON,
+                        AudioRecorderService.PREF_RECORD_ON_DEFAULT));
+                rsw.setOnCheckedChangeListener(new MySwitchListener(
+                        AudioRecorderService.PREF_RECORD_ON));
             }
         }
     };
-    private TimeTransformer mWsvListener, mSsvListener;
+    private TimeTransformer mWsvListener, mSsvListener, mLspListener;
 
     public static SettingsFragment newInstance() {
         SettingsFragment f = new SettingsFragment();
@@ -93,15 +70,25 @@ public class SettingsFragment extends Fragment {
         EditText wsv = (EditText) rootView.findViewById(R.id.window_size_value);
         wsv.removeTextChangedListener(mWsvListener);
         wsv.setOnFocusChangeListener(null);
+        wsv.setOnKeyListener(null);
+        wsv.setOnFocusChangeListener(null);
 
         EditText ssv = (EditText) rootView.findViewById(R.id.sleep_time);
         ssv.removeTextChangedListener(mSsvListener);
         ssv.setOnEditorActionListener(null);
+        ssv.setOnKeyListener(null);
+        ssv.setOnFocusChangeListener(null);
+
+        EditText lsp = (EditText) rootView.findViewById(R.id.life_sign);
+        lsp.removeTextChangedListener(mLspListener);
+        lsp.setOnEditorActionListener(null);
+        lsp.setOnKeyListener(null);
+        lsp.setOnFocusChangeListener(null);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDetach() {
+        super.onDetach();
         mPreferences.unregisterOnSharedPreferenceChangeListener(mListener);
     }
 
@@ -117,28 +104,42 @@ public class SettingsFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_wild_life_settings, container, false);
 
         EditText wsv = (EditText) rootView.findViewById(R.id.window_size_value);
-        mWsvListener = new TimeTransformer(wsv, PREF_WINDOW_SIZE);
+        mWsvListener = new TimeTransformer(wsv, AudioRecorderService.PREF_WINDOW_SIZE,
+                                                AudioRecorderService.PREF_WINDOW_SIZE_DEFAULT);
         wsv.addTextChangedListener(mWsvListener);
         wsv.setOnEditorActionListener(mWsvListener);
         wsv.setOnKeyListener(mWsvListener);
         wsv.setOnFocusChangeListener(mWsvListener);
 
         EditText ssv = (EditText) rootView.findViewById(R.id.sleep_time);
-        mSsvListener = new TimeTransformer(ssv, PREF_SLEEP_TIME);
+        mSsvListener = new TimeTransformer(ssv, AudioRecorderService.PREF_SLEEP_TIME,
+                                                AudioRecorderService.PREF_SLEEP_TIME_DEFAULT);
         ssv.addTextChangedListener(mSsvListener);
         ssv.setOnEditorActionListener(mSsvListener); // pushed enter
         ssv.setOnKeyListener(mSsvListener);          // pushed back
         ssv.setOnFocusChangeListener(mSsvListener);  // changed focus
 
-        boolean recordon = mPreferences.getBoolean(PREF_RECORD_ON, PREF_RECORD_ON_DEFAULT);
+        EditText lsp = (EditText) rootView.findViewById(R.id.life_sign);
+        mLspListener = new TimeTransformer(lsp, LifeSignService.PREF_PERIOD,
+                                                LifeSignService.PREF_PERIOD_DEFAULT);
+        lsp.addTextChangedListener(mLspListener);
+        lsp.setOnEditorActionListener(mLspListener);
+        lsp.setOnKeyListener(mLspListener);
+        lsp.setOnFocusChangeListener(mLspListener);
+
+        EditText url = (EditText) rootView.findViewById(R.id.life_sign_uri);
+        url.setText(LifeSignService.getServerURL(getActivity()));
+
+        boolean recordon = mPreferences.getBoolean(AudioRecorderService.PREF_RECORD_ON,
+                                           AudioRecorderService.PREF_RECORD_ON_DEFAULT);
         Switch rsw = (Switch) rootView.findViewById(R.id.recording_enabled_switch);
         rsw.setChecked(recordon);
-        rsw.setOnCheckedChangeListener(new MySwitchListener(PREF_RECORD_ON));
+        rsw.setOnCheckedChangeListener(new MySwitchListener(AudioRecorderService.PREF_RECORD_ON));
 
-        boolean lowpow = mPreferences.getBoolean(PREF_LOW_POWERMODE, PREF_LOW_POWERMODE_DEFAULT);
+        boolean lowpow = LifeSignService.getPowerSavingMode(getActivity());
         Switch lpw = (Switch) rootView.findViewById(R.id.low_power_mode_switch);
         lpw.setChecked(lowpow);
-        lpw.setOnCheckedChangeListener(new MySwitchListener(PREF_LOW_POWERMODE));
+        lpw.setOnCheckedChangeListener(new MySwitchListener(LifeSignService.PREF_POWERSAVE));
 
         mPreferences.registerOnSharedPreferenceChangeListener(mListener);
 
@@ -183,29 +184,27 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    private class TimeTransformer implements TextWatcher, TextView.OnEditorActionListener, View.OnKeyListener, View.OnFocusChangeListener {
+    private class TimeTransformer extends EditTextStorage implements TextWatcher {
         public static final String FORMAT = "%02dh%02dm%02ds";
-        private final TextView mTv;
-        private final String mKey;
         private int mHour;
         private int mMinutes;
         private int mSeconds;
         private CharSequence mCurrentText;
 
-        public TimeTransformer(TextView tv, String key) {
-            mTv = tv;
-            mKey = key;
-            int seconds = mPreferences.getInt(key, 0);
-            mSeconds = (int) seconds%60;
-            mMinutes = (int) (seconds/60)%(24*60);
-            mHour    = (int) seconds/(24*60);
-            mTv.setText(String.format(FORMAT,mHour,mMinutes,mSeconds));
+        public TimeTransformer(TextView tv, String key, int def) {
+            super(tv, key);
+            int seconds = mPreferences.getInt(key, def);
+            mSeconds = (int) seconds % 60;
+            mMinutes = (int) (seconds % (60 * 60)) / 60;
+            mHour = (int) seconds / (60 * 60);
+            mTv.setText(String.format(FORMAT, mHour, mMinutes, mSeconds));
         }
 
         public void parse(CharSequence s, int gap) {
             mHour = Integer.parseInt((String) s.subSequence(0, 2));
-            mMinutes = Integer.parseInt((String) s.subSequence(2 + gap, 4 + gap)); gap+=gap;
-            mSeconds = Integer.parseInt((String) s.subSequence(4+gap,6+gap));
+            mMinutes = Integer.parseInt((String) s.subSequence(2 + gap, 4 + gap));
+            gap += gap;
+            mSeconds = Integer.parseInt((String) s.subSequence(4 + gap, 6 + gap));
         }
 
         @Override
@@ -216,16 +215,22 @@ public class SettingsFragment extends Fragment {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (count != 1)
-                throw new AssertionError(String.format("count!=1 but %d", count));
+                return;
 
             /* shift in the current input */
             char c = s.charAt(start);
-            StringBuilder sb = new StringBuilder();
-            sb.append( String.format("%02d%02d%02d", mHour, mMinutes, mSeconds), 1, 6);
-            sb.append(c);
-            parse(sb, 0);
+
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(String.format("%02d%02d%02d", mHour, mMinutes, mSeconds), 1, 6);
+                sb.append(c);
+                parse(sb, 0);
+            } catch (NumberFormatException e) {
+                ;
+            }
+
             mTv.removeTextChangedListener(this);
-            mTv.setText(String.format(FORMAT,mHour,mMinutes,mSeconds));
+            mTv.setText(String.format(FORMAT, mHour, mMinutes, mSeconds));
             mTv.addTextChangedListener(this);
         }
 
@@ -234,19 +239,7 @@ public class SettingsFragment extends Fragment {
         }
 
         @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                store();
-                return true;
-            }
-
-            return false;
-        }
-
         public void store() {
-            if (mEditor == null)
-                mEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-
             if (mSeconds > 59) {
                 mMinutes += 1;
                 mSeconds %= 60;
@@ -261,9 +254,50 @@ public class SettingsFragment extends Fragment {
                 mHour = 99;
 
             mTv.removeTextChangedListener(this);
-            mTv.setText(String.format(FORMAT,mHour,mMinutes,mSeconds));
+            mTv.setText(String.format(FORMAT, mHour, mMinutes, mSeconds));
             mTv.addTextChangedListener(this);
-            mEditor.putInt(mKey, mHour*3600+mMinutes*60+mSeconds).commit();
+
+            if (mEditor == null)
+                mEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+
+            mEditor.putInt(mKey, mHour * 3600 + mMinutes * 60 + mSeconds);
+            mHandler.removeCallbacks(mCommitEditor);
+            mHandler.postDelayed(mCommitEditor, 10 * 1000);
+        }
+    }
+
+    public class EditTextStorage  implements
+                                    TextView.OnEditorActionListener,
+                                    View.OnKeyListener,
+                                    View.OnFocusChangeListener {
+        final TextView mTv;
+        final String mKey;
+
+        public EditTextStorage(TextView tv, String preference_key) {
+            if (mEditor == null)
+                mEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+
+            mKey = preference_key;
+            mTv = tv;
+        }
+
+        public void store() {
+            if (mEditor == null)
+                mEditor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+
+            mEditor.putString(mKey, mTv.getText().toString());
+            mHandler.removeCallbacks(mCommitEditor);
+            mHandler.postDelayed(mCommitEditor, 10 * 1000);
+        }
+
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                store();
+                return true;
+            }
+
+            return false;
         }
 
         @Override

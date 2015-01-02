@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -16,7 +17,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -31,7 +31,16 @@ import javaFlacEncoder.StreamConfiguration;
  * <p/>
  * helper methods.
  */
-public class DataRecorderService extends IntentService {
+public class AudioRecorderService extends IntentService {
+    public static final String PREF_WINDOW_SIZE = "window size_in_seconds";
+    public static final int PREF_WINDOW_SIZE_DEFAULT = 1 * 60; // in seconds
+    public static final String PREF_SLEEP_TIME = "sleep_time_in_seconds";
+    public static final int PREF_SLEEP_TIME_DEFAULT = 10*60;
+    public static final String PREF_STORAGE_PATH = "storage_path";
+    public static final String PREF_STORAGE_PATH_DEFAULT =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).toString();
+    public static final String PREF_RECORD_ON = "recording_on";
+    public static final boolean PREF_RECORD_ON_DEFAULT = false;
     private static final String ACTION_RECORD = "de.uni_freiburg.es.wildlife.action.RECORD";
     public static final String IS_RECORDING = "is_recording";
     private final String TAG = this.getClass().getSimpleName();
@@ -44,14 +53,14 @@ public class DataRecorderService extends IntentService {
     private static class MyChangeListener implements
             SharedPreferences.OnSharedPreferenceChangeListener {
 
-        private DataRecorderService myRecorderService;
+        private AudioRecorderService myRecorderService;
         private static MyChangeListener instance = null;
 
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals(SettingsFragment.PREF_RECORD_ON) ||
-                    key.equals(SettingsFragment.PREF_STORAGE_PATH) ||
-                    key.equals(SettingsFragment.PREF_SLEEP_TIME) ||
-                    key.equals(SettingsFragment.PREF_WINDOW_SIZE)) {
+            if (key.equals(PREF_RECORD_ON) ||
+                    key.equals(PREF_STORAGE_PATH) ||
+                    key.equals(PREF_SLEEP_TIME) ||
+                    key.equals(PREF_WINDOW_SIZE)) {
                 /* this will restart an ongoing recording session or start a new one, if any
                  * of the above listed settings has changed. */
                 myRecorderService.mIsRecording = false;
@@ -59,7 +68,7 @@ public class DataRecorderService extends IntentService {
             }
         }
 
-        public static MyChangeListener newInstance(DataRecorderService s) {
+        public static MyChangeListener newInstance(AudioRecorderService s) {
             if (instance == null)
                 instance = new MyChangeListener();
             instance.myRecorderService = s;
@@ -75,12 +84,12 @@ public class DataRecorderService extends IntentService {
      */
     // TODO: Customize helper method
     public static void startActionRecord(Context context) {
-        Intent intent = new Intent(context, DataRecorderService.class);
+        Intent intent = new Intent(context, AudioRecorderService.class);
         intent.setAction(ACTION_RECORD);
         context.startService(intent);
     }
 
-    public DataRecorderService() {
+    public AudioRecorderService() {
         super("DataRecorderService");
     }
 
@@ -90,8 +99,8 @@ public class DataRecorderService extends IntentService {
             final String action = intent.getAction();
             if (ACTION_RECORD.equals(action)) {
                 boolean isRecordingEnabled = mPreferences.getBoolean(
-                        SettingsFragment.PREF_RECORD_ON,
-                        SettingsFragment.PREF_RECORD_ON_DEFAULT);
+                        PREF_RECORD_ON,
+                        PREF_RECORD_ON_DEFAULT);
 
                 if (!isRecordingEnabled)
                 {
@@ -109,7 +118,7 @@ public class DataRecorderService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Intent i = new Intent(this, DataRecorderService.class);
+        Intent i = new Intent(this, AudioRecorderService.class);
         i.setAction(ACTION_RECORD);
         mNextSchedule = PendingIntent.getService(this, 0, i, 0);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -119,22 +128,21 @@ public class DataRecorderService extends IntentService {
 
     private void handleActionRecordAudio() {
         File storagePath = new File(mPreferences.getString(
-                SettingsFragment.PREF_STORAGE_PATH,
-                SettingsFragment.PREF_STORAGE_PATH_DEFAULT));
+                PREF_STORAGE_PATH,
+                PREF_STORAGE_PATH_DEFAULT));
         String filename = new File(storagePath,
                 mDateFormat.format(new Date())+".flac").toString();
         long sample_time = (long) mPreferences.getInt(
-                SettingsFragment.PREF_WINDOW_SIZE,
-                SettingsFragment.PREF_WINDOW_SIZE_DEFAULT) * 1000, // from seconds to millis
+                PREF_WINDOW_SIZE,
+                PREF_WINDOW_SIZE_DEFAULT) * 1000, // from seconds to millis
              sleep_time = (long) mPreferences.getInt(
-                SettingsFragment.PREF_SLEEP_TIME,
-                SettingsFragment.PREF_SLEEP_TIME_DEFAULT) * 1000;
+                PREF_SLEEP_TIME,
+                PREF_SLEEP_TIME_DEFAULT) * 1000;
 
         Log.d(TAG, "starting ");
 
         if (!storagePath.canWrite())
-            throw new UnsupportedOperationException(
-                    "storage path is not writable: " + storagePath.toString());
+            return;
 
         /* do the recording */
         doAudioRecording(filename, sample_time);
@@ -145,8 +153,6 @@ public class DataRecorderService extends IntentService {
         aman.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                  SystemClock.elapsedRealtime() + sleep_time,
                  mNextSchedule);
-
-        //enableLowPowerMode();
     }
 
     private void setIsRecording(boolean state) {
@@ -228,20 +234,6 @@ public class DataRecorderService extends IntentService {
         rec.stop();
         rec = null;
         Log.e(TAG, "recording finished");
-    }
-
-    private void enableLowPowerMode() {
-        boolean isLowPowerEnabled = mPreferences.getBoolean(
-                SettingsFragment.PREF_LOW_POWERMODE,
-                SettingsFragment.PREF_LOW_POWERMODE_DEFAULT);
-
-        if (isLowPowerEnabled) {
-            // needs system privs
-            //Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
-            Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            intent.putExtra("state", true);
-            sendBroadcast(intent);
-        }
     }
 
     public int getMaxSampleRate() {

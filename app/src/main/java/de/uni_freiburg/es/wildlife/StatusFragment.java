@@ -1,14 +1,8 @@
 package de.uni_freiburg.es.wildlife;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -17,11 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.util.Date;
-import java.util.Set;
 
 import wildlife.es.uni_freiburg.de.wildlifemonitor.R;
 
@@ -43,7 +34,7 @@ public class StatusFragment extends Fragment {
             StatusFragment.this.updateStatus();
         }
     };
-    private Date mRecordingDate;
+    private Date mRecordingDate = null;
     private SharedPreferences.OnSharedPreferenceChangeListener mChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -52,15 +43,15 @@ public class StatusFragment extends Fragment {
 
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar);
             boolean isRecording = mPreferences.getBoolean(
-                    DataRecorderService.IS_RECORDING,
+                    AudioRecorderService.IS_RECORDING,
                     false);
 
             progressBar.setProgressDrawable(isRecording ?
                     getResources().getDrawable(R.drawable.circular_progress) :
                     getResources().getDrawable(R.drawable.circular_progress_red));
             progressBar.setMax(isRecording ?
-                    mPreferences.getInt(SettingsFragment.PREF_WINDOW_SIZE, SettingsFragment.PREF_WINDOW_SIZE_DEFAULT) * 1000:
-                    mPreferences.getInt(SettingsFragment.PREF_SLEEP_TIME, SettingsFragment.PREF_SLEEP_TIME_DEFAULT) * 1000);
+                    mPreferences.getInt(AudioRecorderService.PREF_WINDOW_SIZE, AudioRecorderService.PREF_WINDOW_SIZE_DEFAULT) * 1000:
+                    mPreferences.getInt(AudioRecorderService.PREF_SLEEP_TIME, AudioRecorderService.PREF_SLEEP_TIME_DEFAULT) * 1000);
             progressBar.setProgress(1);
             mRecordingDate = new Date();
         }
@@ -89,9 +80,6 @@ public class StatusFragment extends Fragment {
         mRootView = inflater.inflate(R.layout.fragment_wild_life_monitor, container, false);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mHandler = new Handler();
-        updateStatus();
-
-
         /**
          * make a large button for rec starting and stopping
          */
@@ -100,16 +88,18 @@ public class StatusFragment extends Fragment {
             @Override
             public boolean onLongClick(View v) {
                 final boolean isRecordingEnabled = mPreferences.getBoolean(
-                        SettingsFragment.PREF_RECORD_ON,
-                        SettingsFragment.PREF_RECORD_ON_DEFAULT);
+                        AudioRecorderService.PREF_RECORD_ON,
+                        AudioRecorderService.PREF_RECORD_ON_DEFAULT);
 
-                mPreferences.edit().putBoolean(SettingsFragment.PREF_RECORD_ON,
+                mPreferences.edit().putBoolean(AudioRecorderService.PREF_RECORD_ON,
                         !isRecordingEnabled).commit();
                 return true;
             }
         });
 
+        mChangeListener.onSharedPreferenceChanged(mPreferences, null); // initialize
         mPreferences.registerOnSharedPreferenceChangeListener(mChangeListener);
+        updateStatus();
 
         return mRootView;
     }
@@ -131,8 +121,8 @@ public class StatusFragment extends Fragment {
         /**
          *  modify storage status line
          */
-        String storagePath = mPreferences.getString(SettingsFragment.PREF_STORAGE_PATH,
-                                            SettingsFragment.PREF_STORAGE_PATH_DEFAULT);
+        String storagePath = mPreferences.getString(AudioRecorderService.PREF_STORAGE_PATH,
+                                            AudioRecorderService.PREF_STORAGE_PATH_DEFAULT);
         File storageDir = new File(storagePath);
         TextView event_status = (TextView) mRootView.findViewById(R.id.numevents);
 
@@ -148,11 +138,10 @@ public class StatusFragment extends Fragment {
          * modify progress bar and status line
          */
         final boolean isRecordingEnabled = mPreferences.getBoolean(
-                    SettingsFragment.PREF_RECORD_ON,
-                    SettingsFragment.PREF_RECORD_ON_DEFAULT),
-                isRecording = mPreferences.getBoolean(
-                        DataRecorderService.IS_RECORDING,
-                        false);
+                    AudioRecorderService.PREF_RECORD_ON,
+                    AudioRecorderService.PREF_RECORD_ON_DEFAULT),
+                      isRecording = mPreferences.getBoolean(
+                        AudioRecorderService.IS_RECORDING, false);
 
         TextView status = (TextView) mRootView.findViewById(R.id.status);
         TextView next = (TextView) mRootView.findViewById(R.id.nexttimer);
@@ -164,17 +153,14 @@ public class StatusFragment extends Fragment {
             mRecordingDate = null;
             next.setText("");
         } else {
-            Date now = new Date();
-
             if (mRecordingDate == null)
                 mRecordingDate = new Date();
 
+            Date now = new Date();
             long diff = now.getTime() - mRecordingDate.getTime();
             progressBar.setProgress((int) diff);
 
-            status.setText(isRecording ? getResources().getString(R.string.is_recording) :
-                    getResources().getString(R.string.is_sleeping));
-
+            status.setText(isRecording ? getResources().getString(R.string.is_recording) : getResources().getString(R.string.is_sleeping));
             next.setText(SettingsFragment.toTimeString((1000 + progressBar.getMax() - diff)/1000, "0 sec") + " left");
         }
 

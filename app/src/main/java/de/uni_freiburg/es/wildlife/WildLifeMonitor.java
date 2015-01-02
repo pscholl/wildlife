@@ -3,30 +3,17 @@ package de.uni_freiburg.es.wildlife;
 import java.io.File;
 import java.util.Locale;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import wildlife.es.uni_freiburg.de.wildlifemonitor.R;
 
@@ -61,22 +48,9 @@ public class WildLifeMonitor extends ActionBarActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        // get prefs and fix defaults for storage path
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String storagePath = mPreferences.getString(SettingsFragment.PREF_STORAGE_PATH,
-                SettingsFragment.PREF_STORAGE_PATH_DEFAULT);
-        File storageDir = new File(storagePath);
-
-        Log.d("abc", storagePath);
-        //if (storagePath.equals(SettingsFragment.PREF_STORAGE_PATH_DEFAULT) && !storageDir.canWrite())
-            //mPreferences.edit().putString(SettingsFragment.PREF_STORAGE_PATH,
-            //        getApplicationInfo().dataDir).commit();
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        DataRecorderService.startActionRecord(this);
+        // start background services for the first time.
+        AudioRecorderService.startActionRecord(this);
+        LifeSignService.startLifesigning(this);
     }
 
     @Override

@@ -17,6 +17,6 @@
     <string name="is_recording">recording</string>
     <string name="is_sleeping">sleeping</string>
     <string name="not_enabled">recording not enabled</string>
-    <string name="recording_enabled_label">recording enabled</string>
+    <string name="recording_enabled_label">recording</string>
 
 </resources>
