@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.util.Date;
 
@@ -96,6 +98,9 @@ public class StatusFragment extends Fragment {
                 return true;
             }
         });
+
+        TextView devid = (TextView) mRootView.findViewById(R.id.deviceidtext);
+        devid.setText(AndroidUniqueDeviceID.getDeviceId(getActivity()));
 
         mChangeListener.onSharedPreferenceChanged(mPreferences, null); // initialize
         mPreferences.registerOnSharedPreferenceChangeListener(mChangeListener);

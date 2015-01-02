@@ -42,7 +42,6 @@ public class LifeSignService extends IntentService {
     public static final String PREF_SERVERURL = "LifeSignServer";
     public static final String PREF_PERIOD = "LifeSignPeriodInSeconds";
     public static final String PREF_POWERSAVE = "LifeSignPowerSaving";
-    public static final String PREF_DEVICEID = "LifeSignDeviceID";
     public static final String TAG = LifeSignService.class.toString();
     public static final String PREF_SERVERURL_DEFAULT = "http://es.informatik.uni-freiburg.de:81/wildlifesign";
     public static final int PREF_PERIOD_DEFAULT = 12 * 60 * 60;
@@ -196,7 +195,7 @@ public class LifeSignService extends IntentService {
         StringBuilder msg = new StringBuilder();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String deviceid = prefs.getString(PREF_DEVICEID, AndroidUniqueDeviceID.getDeviceId(this));
+        String deviceid = AndroidUniqueDeviceID.getDeviceId(this);
         Location position = getLocation();
         float[] temperature = new OneShotSensorReader(Sensor.TYPE_AMBIENT_TEMPERATURE).get();
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
