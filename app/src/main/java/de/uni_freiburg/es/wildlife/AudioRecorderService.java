@@ -35,7 +35,7 @@ public class AudioRecorderService extends IntentService {
     public static final String PREF_WINDOW_SIZE = "window size_in_seconds";
     public static final int PREF_WINDOW_SIZE_DEFAULT = 1 * 60; // in seconds
     public static final String PREF_SLEEP_TIME = "sleep_time_in_seconds";
-    public static final int PREF_SLEEP_TIME_DEFAULT = 10*60;
+    public static final int PREF_SLEEP_TIME_DEFAULT = 9 * 60;
     public static final String PREF_STORAGE_PATH = "storage_path";
     public static final String PREF_STORAGE_PATH_DEFAULT =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).toString();

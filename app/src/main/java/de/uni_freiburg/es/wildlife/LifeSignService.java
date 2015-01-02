@@ -87,7 +87,7 @@ public class LifeSignService extends IntentService {
 
     public static boolean getPowerSavingMode(Context c) {
         return PreferenceManager.getDefaultSharedPreferences(c).getBoolean(PREF_POWERSAVE,
-                false);
+                true);
     }
 
     public static boolean setPowerSavingMode(Context c, boolean save_power) {
