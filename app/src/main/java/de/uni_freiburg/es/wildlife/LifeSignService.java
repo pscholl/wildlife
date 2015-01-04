@@ -224,9 +224,9 @@ public class LifeSignService extends IntentService {
             obj.put("batterytemperature", batteryTemperature);
             obj.put("batterycapacity", batteryCapacity);
             obj.put("spaceleft", spaceLeft);
-            obj.put("sampletime", prefs.getInt(AudioRecorderService.PREF_WINDOW_SIZE, 0));
-            obj.put("interval", prefs.getInt(AudioRecorderService.PREF_SLEEP_TIME, 0));
-            obj.put("lifesigninterval", prefs.getInt(PREF_PERIOD, 0));
+            obj.put("sampletime", prefs.getInt(AudioRecorderService.PREF_WINDOW_SIZE, AudioRecorderService.PREF_WINDOW_SIZE_DEFAULT));
+            obj.put("interval", prefs.getInt(AudioRecorderService.PREF_SLEEP_TIME, AudioRecorderService.PREF_SLEEP_TIME_DEFAULT));
+            obj.put("lifesigninterval", prefs.getInt(PREF_PERIOD, PREF_PERIOD_DEFAULT));
         } catch (JSONException e) {
             e.printStackTrace();
         }
