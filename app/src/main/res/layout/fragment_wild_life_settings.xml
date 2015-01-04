@@ -23,6 +23,7 @@
 
         <EditText
             android:layout_width="wrap_content"
+            android:imeOptions="actionDone"
             android:layout_height="wrap_content"
             android:cursorVisible="false"
             android:maxLines="1"
@@ -51,6 +52,7 @@
 
         <EditText
             android:layout_width="wrap_content"
+            android:imeOptions="actionDone"
             android:layout_height="wrap_content"
             android:cursorVisible="false"
             android:maxLines="1"
@@ -85,6 +87,7 @@
             android:cursorVisible="false"
             android:maxLines="1"
             android:id="@+id/life_sign"
+            android:imeOptions="actionDone"
             android:inputType="time"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true" />
@@ -104,6 +107,8 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="http://example.com/withaverylonglonglonglonglongtext"
             android:id="@+id/life_sign_uri"
+            android:imeOptions="actionDone"
+            android:inputType="textUri"
             android:layout_below="@+id/life_sign"
             android:layout_alignEnd="@+id/life_sign"
             android:maxWidth="200dp"

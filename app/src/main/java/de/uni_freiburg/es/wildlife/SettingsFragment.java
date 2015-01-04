@@ -1,5 +1,6 @@
 package de.uni_freiburg.es.wildlife;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -55,6 +57,7 @@ public class SettingsFragment extends Fragment {
         }
     };
     private TimeTransformer mWsvListener, mSsvListener, mLspListener;
+    private EditTextStorage mURLListener;
 
     public static SettingsFragment newInstance() {
         SettingsFragment f = new SettingsFragment();
@@ -84,6 +87,11 @@ public class SettingsFragment extends Fragment {
         lsp.setOnEditorActionListener(null);
         lsp.setOnKeyListener(null);
         lsp.setOnFocusChangeListener(null);
+
+        EditText url = (EditText) rootView.findViewById(R.id.life_sign_uri);
+        url.setOnEditorActionListener(null);
+        url.setOnKeyListener(null);
+        url.setOnFocusChangeListener(null);
     }
 
     @Override
@@ -128,7 +136,11 @@ public class SettingsFragment extends Fragment {
         lsp.setOnFocusChangeListener(mLspListener);
 
         EditText url = (EditText) rootView.findViewById(R.id.life_sign_uri);
+        mURLListener = new EditTextStorage(url, LifeSignService.PREF_SERVERURL);
         url.setText(LifeSignService.getServerURL(getActivity()));
+        url.setOnEditorActionListener(mURLListener);
+        url.setOnKeyListener(mURLListener);
+        url.setOnFocusChangeListener(mURLListener);
 
         boolean recordon = mPreferences.getBoolean(AudioRecorderService.PREF_RECORD_ON,
                                            AudioRecorderService.PREF_RECORD_ON_DEFAULT);
@@ -294,6 +306,8 @@ public class SettingsFragment extends Fragment {
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 store();
+                InputMethodManager imm = (InputMethodManager)v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 return true;
             }
 

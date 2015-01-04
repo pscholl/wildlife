@@ -30,6 +30,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +46,7 @@ public class LifeSignService extends IntentService {
     public static final String PREF_PERIOD = "LifeSignPeriodInSeconds";
     public static final String PREF_POWERSAVE = "LifeSignPowerSaving";
     public static final String TAG = LifeSignService.class.toString();
-    public static final String PREF_SERVERURL_DEFAULT = "http://es.informatik.uni-freiburg.de:81/wildlifesign";
+    public static final String PREF_SERVERURL_DEFAULT = "http://es.informatik.uni-freiburg.de:81";
     public static final int PREF_PERIOD_DEFAULT = 12 * 60 * 60;
     private static MySharedPreferencesListener mSharedPrefsListener;
     private PendingIntent mNextSchedule;
@@ -206,29 +209,29 @@ public class LifeSignService extends IntentService {
                 (batteryStatus.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10.),
               batteryPercentage = (float) batteryLevel / batteryCapacity * 100.f;
 
-        if (position != null)
-            msg.append(String.format("position: { %f, %f }", position.getLatitude(), position.getLongitude()));
-        if (temperature.length > 0)
-            msg.append(String.format("temperature: %.2f\n", temperature));
-
         String storagePath = prefs.getString(AudioRecorderService.PREF_STORAGE_PATH,
-                                    AudioRecorderService.PREF_STORAGE_PATH_DEFAULT);
+                AudioRecorderService.PREF_STORAGE_PATH_DEFAULT);
         File storageDir = new File(storagePath);
         float spaceLeft = (float) (storageDir.getUsableSpace() / (1024 * 1024 * 1024.));
 
-        msg.append(String.format("deviceid: %s\n", deviceid));
-        msg.append(String.format("battery temperature: %.2f\n",batteryTemperature ));
-        msg.append(String.format("battery charge: %.1f\n", batteryPercentage));
-        msg.append(String.format("battery capacity: %d\n", batteryCapacity));
-        msg.append(String.format("space left: %.4fGb\n", spaceLeft));
-        msg.append(String.format("sample interval: %d\n",
-                prefs.getInt(AudioRecorderService.PREF_SLEEP_TIME, 0)));
-        msg.append(String.format("sample time: %d\n",
-                prefs.getInt(AudioRecorderService.PREF_WINDOW_SIZE, 0)));
-        msg.append(String.format("lifesign interval: %d\n",
-                prefs.getInt(PREF_PERIOD, 0)));
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("latitude", position!=null ? position.getLatitude() : 0);
+            obj.put("longitude", position!=null ? position.getLongitude() : 0);
+            obj.put("temperature", temperature.length>0 ? temperature[0] : 0.);
+            obj.put("deviceid", deviceid);
+            obj.put("batterycharge", batteryPercentage);
+            obj.put("batterytemperature", batteryTemperature);
+            obj.put("batterycapacity", batteryCapacity);
+            obj.put("spaceleft", spaceLeft);
+            obj.put("sampletime", prefs.getInt(AudioRecorderService.PREF_WINDOW_SIZE, 0));
+            obj.put("interval", prefs.getInt(AudioRecorderService.PREF_SLEEP_TIME, 0));
+            obj.put("lifesigninterval", prefs.getInt(PREF_PERIOD, 0));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        return msg.toString();
+        return obj.toString();
     }
 
     private void enablePowerSaving() {
@@ -266,6 +269,7 @@ public class LifeSignService extends IntentService {
         else
             position = LocationServices.FusedLocationApi.getLastLocation(g);
 
+        g.disconnect();
         return position;
     }
 
