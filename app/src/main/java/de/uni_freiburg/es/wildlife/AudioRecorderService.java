@@ -7,8 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.MediaRouter;
+import android.media.MediaScannerConnection;
+import android.media.audiofx.AutomaticGainControl;
+import android.media.audiofx.NoiseSuppressor;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -151,7 +157,7 @@ public class AudioRecorderService extends IntentService {
          * Intent is triggered, and the recording is not enabled! */
         AlarmManager aman = (AlarmManager) getSystemService(ALARM_SERVICE);
         aman.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                 SystemClock.elapsedRealtime() + sleep_time,
+                 SystemClock.elapsedRealtime() + SystemClock.elapsedRealtime() % sleep_time,
                  mNextSchedule);
     }
 
@@ -170,9 +176,12 @@ public class AudioRecorderService extends IntentService {
         short recbuf[] = new short[BUFSIZE/2];
 
         AudioRecord rec = new AudioRecord(
-                MediaRecorder.AudioSource.CAMCORDER, samplerate,
+                MediaRecorder.AudioSource.DEFAULT, samplerate,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 BUFSIZE);
+
+        //AudioManager audiom = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
+        //audiom.setSpeakerphoneOn(true);
 
         StreamConfiguration flac = new StreamConfiguration();
         flac.setChannelCount(1);
@@ -216,6 +225,7 @@ public class AudioRecorderService extends IntentService {
                 for (int i=0; i<len; i++)
                     flacbuf[i] = recbuf[i];
 
+                //fec.addSamples(flacbuf, len/2);
                 fec.addSamples(flacbuf, len);
 
                 while (fec.fullBlockSamplesAvailableToEncode() > 0)
@@ -234,6 +244,10 @@ public class AudioRecorderService extends IntentService {
         rec.stop();
         rec = null;
         Log.e(TAG, "recording finished");
+
+        //audiom.setSpeakerphoneOn(false);
+        MediaScannerConnection.scanFile(getApplicationContext(),
+                new String[]{filename}, new String[]{"audio/flac"}, null);
     }
 
     public int getMaxSampleRate() {
@@ -249,8 +263,9 @@ public class AudioRecorderService extends IntentService {
                         BUFSIZE);
                 return rate;
             } catch (IllegalArgumentException e) {
-                Log.d(TAG, String.format("check rate %d", rate), e);
+                Log.d(TAG, String.format("check rate %d", rate));
             }
+
         return 0;
     }
 }
